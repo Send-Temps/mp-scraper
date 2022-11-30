@@ -12,9 +12,13 @@ class MegosSpider(scrapy.Spider):
         page = response.url.split("/")[-2]
 
         if content_type == 'area':
+            #if parent area
+            if response.css('div.left-nav-route-table'):
+                print(" ")
             links = response.css('div.lef-nav-row a::attr(href)').getall()
             for link in links:
                 yield response.follow(link, self.parse)
+            #if leaf area
         elif content_type == 'route':
             response = response.css("h1::text").get().split("\n")[1].strip()
             yield response

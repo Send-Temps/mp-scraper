@@ -26,8 +26,11 @@ back of envelope:
 		64 minutes with respecting 60s crawl delay
 		6.4 minutes with 6 seconds crawl delay
 
-	get all sub areas on area page:
+	get all sub areas on parent area page:
 		response.css('div.lef-nav-row a::attr(href)').getall()
+
+	get all routes from leaf node area
+		response.css('div.left-nav-route-table a::attr(href)').getall()
 
 	get route name from route page:
 		response.css("h1::text").get().split("\n")[1].strip()
