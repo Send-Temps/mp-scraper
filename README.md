@@ -44,5 +44,8 @@ back of envelope:
 	get route's parent area id:
 		response.css('div.mb-half a::attr(href)').getall()[-5].split('/')[-2]
 
+	get coords from area page:
+		response.css("table.description-details tr:nth-child(2) td:nth-child(2)::text").get().strip(" \n")
+
 	check if leaf node area page or parent area
 		response.css("table#left-nav-route-table").get()
