@@ -2,12 +2,15 @@ import scrapy
 import logging
 
 class MegosSpider(scrapy.Spider):
+    """
+    Retrieve route data for all routes within all sub areas of start url.
+    """
     name = 'megos'
     start_urls = [
         'https://www.mountainproject.com/area/111721391/florida'
     ]
 
-    def parse(self, response, coord=None):
+    def parse(self, response):
 
         content_type = response.url.split("/")[-3]
 
@@ -17,8 +20,14 @@ class MegosSpider(scrapy.Spider):
             #if leaf area, add route urls to queue to be crawled:
             if (response.css("table#left-nav-route-table").get() != None):
 
+                #check for pages omitting elevation data
+                if (len(response.css("table.description-details tr")) < 5):
+                    gps = "table.description-details tr:nth-child(1) td:nth-child(2)::text"
+                else:
+                    gps = "table.description-details tr:nth-child(2) td:nth-child(2)::text"
+
                 coord = response \
-                    .css("table.description-details tr:nth-child(2) td:nth-child(2)::text") \
+                    .css(gps) \
                     .get() \
                     .strip(" \n")
 
@@ -27,7 +36,7 @@ class MegosSpider(scrapy.Spider):
                     .getall()
 
                 for link in links:
-                    yield response.follow(link, self.parse)
+                    yield response.follow(link, self.parse, meta={'coord': coord})
 
             #else, parent area, so add sub-areas to queue:
             links = response.css('div.lef-nav-row a::attr(href)').getall()
@@ -36,7 +45,7 @@ class MegosSpider(scrapy.Spider):
 
         #for route pages, scrape relevant data
         elif content_type == 'route':
-            yield self.parse_route(response, coord)
+            yield self.parse_route(response, response.meta.get('coord'))
 
         #in case other links are visited in error:
         else:

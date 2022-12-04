@@ -20,6 +20,8 @@ back of envelope:
 		10s ---> ~35 days
 		5s  ---> ~17 days
 		1s  ---> ~3.5 days
+		500ms -> ~1.8 days
+		100ms -> ~0.36 days -> 9 hours
 
 	Florida
 		64 climbs total
