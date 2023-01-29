@@ -3,12 +3,27 @@ import logging
 
 class MegosSpider(scrapy.Spider):
     """
-    Retrieve route data for all routes within all sub areas of start url.
+    Retrieve route data for all routes within all sub areas of start url arg.
+    Input: 
+        start_urls (List)
+    Output:
+        payload.json (JSON file)
     """
     name = 'megos'
-    start_urls = [
-        'https://www.mountainproject.com/area/111721391/florida'
-    ]
+    start_urls = []
+    custom_settings = {
+        "FEEDS": {
+            "payload.json": {"format": "json"},
+        },
+    }
+
+    # start_urls = [
+    #     'https://www.mountainproject.com/area/111721391/florida'
+    # ]
+
+    def __init__(self, **kwargs):
+        super(MegosSpider, self).__init__(**kwargs) 
+        self.start_urls = kwargs.get('start_urls')
 
     def parse(self, response):
 
