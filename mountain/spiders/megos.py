@@ -60,7 +60,7 @@ class MegosSpider(scrapy.Spider):
 
         #for route pages, scrape relevant data
         elif content_type == 'route':
-            yield self.parse_route(response, response.meta.get('coord'))
+            yield self.parse_route(response, response.meta.get('coord'), response.css('h1::text').get().strip())
 
         #in case other links are visited in error:
         else:
@@ -68,7 +68,7 @@ class MegosSpider(scrapy.Spider):
 
 
     #parse route into relevant info and return JSON
-    def parse_route(self, route, coord):
+    def parse_route(self, route, coord, area):
         route_name = route.css("h1::text").get().split("\n")[1].strip()
         route_id = route.url.split("/")[-2]
         route_type = route \
@@ -83,13 +83,16 @@ class MegosSpider(scrapy.Spider):
             .css('div.mb-half a::attr(href)') \
             .getall()[-5] \
             .split('/')[-2]
+        state = route.css('div.mb-half a::text').getall()[1]
 
         return {
             'route': route_name,
-            'id': route_id,
+            'mp_id': route_id,
             'type': route_type,
             'coord': coord,
             'grade': grade,
-            'area_id': area_id
+            'area_id': area_id,
+            'area': area,
+            'state': state
         }
 
