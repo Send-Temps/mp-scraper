@@ -17,6 +17,7 @@ try:
     cache_filepath = os.environ.get('CACHE_FILEPATH')
     gps_filepath = os.environ.get('GPS_FILEPATH')
     dynamodb_table = os.environ.get('DYNAMODB_TABLE')
+    mpIdMapper_table = os.environ.get('MPIDMAPPER_TABLE')
     machine_id = os.environ.get('MACHINE_ID')
 
     util = Util(s3_bucket_name, dynamodb_table)
@@ -65,9 +66,9 @@ def main():
     #
     gps_data = []
 
-    with util.get_ddb_batch_writer() as batch:
+    with util.get_batch_writer_ddb() as batch:
         for route in payload:
-            st_id = Util.get_id()
+            st_id = util.get_id()
             st_route = {
                 "routeId": st_id,
                 "mpId": route["mp_id"],
@@ -83,18 +84,18 @@ def main():
             # If the route exists in the cache already:
             if st_id in cache:
                 # if hash of route data has changed,
-                if cache[st_id] != Util.hash_route_data(st_route):
+                if cache[st_id] != util.hash_route_data(st_route):
                     # update in ddb
                     batch.put_item(Item=st_route)
                     # store updated hash in cache
-                    cache[st_id] = Util.hash_route_data(st_route)
+                    cache[st_id] = util.hash_route_data(st_route)
 
             # If the route does NOT exist in the cache:
             else:
                 #put in ddb
                 batch.put_item(Item=st_route)
                 #put in new cache file 
-                cache[st_id] = Util.hash_route_data(st_route)
+                cache[st_id] = util.hash_route_data(st_route)
                 #put in new gps data s3 file
                 gps_data.append({
                     "routeId": st_id,
