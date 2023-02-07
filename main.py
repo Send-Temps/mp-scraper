@@ -7,9 +7,7 @@ from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
 try:
-    if os.environ.get("ENV") == "prod":
-        pass
-    else:
+    if os.environ.get("ENV") != "prod":
         from dotenv import load_dotenv
         load_dotenv()
         
@@ -19,6 +17,7 @@ try:
     cache_filepath = os.environ.get('CACHE_FILEPATH')
     gps_filepath = os.environ.get('GPS_FILEPATH')
     dynamodb_table = os.environ.get('DYNAMODB_TABLE')
+    machine_id = os.environ.get('MACHINE_ID')
 
     util = Util(s3_bucket_name, dynamodb_table)
 
