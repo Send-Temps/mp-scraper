@@ -20,7 +20,7 @@ try:
     mpIdMapper_table = os.environ.get('MPIDMAPPER_TABLE')
     machine_id = os.environ.get('MACHINE_ID')
 
-    util = Util(s3_bucket_name, dynamodb_table)
+    util = Util(s3_bucket_name, dynamodb_table, mpIdMapper_table)
 
 except Exception as err:
     print(err)
@@ -68,7 +68,7 @@ def main():
 
     with util.get_batch_writer_ddb() as batch:
         for route in payload:
-            st_id = util.get_id()
+            st_id = util.get_id(route["mp_id"])
             st_route = {
                 "routeId": st_id,
                 "mpId": route["mp_id"],
