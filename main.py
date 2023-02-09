@@ -18,7 +18,6 @@ try:
     gps_filepath = os.environ.get('GPS_FILEPATH')
     dynamodb_table = os.environ.get('DYNAMODB_TABLE')
     mpIdMapper_table = os.environ.get('MPIDMAPPER_TABLE')
-    machine_id = os.environ.get('MACHINE_ID')
 
     util = Util(s3_bucket_name, dynamodb_table, mpIdMapper_table)
 
@@ -49,7 +48,7 @@ def main():
     #    }
     #
     if (util.check_for_file_s3(cache_filepath)):
-        cache = util.read_from_s3(cache_filepath)
+        cache = json.loads(util.read_from_s3(cache_filepath))
     else:
         cache = {}
 
@@ -57,7 +56,6 @@ def main():
     #
     #    gps_data = [
     #        {
-    #           "routeName": <Route Name>,
     #           "routeId": <Send Temps ID>,
     #           "GPS": <GPS Coords>
     #        },
@@ -99,7 +97,6 @@ def main():
                 #put in new gps data s3 file
                 gps_data.append({
                     "routeId": st_id,
-                    "routeName": route["route"],
                     "GPS": route["coord"]
                 })
 

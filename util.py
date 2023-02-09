@@ -72,7 +72,3 @@ class Util:
     def read_from_ddb(self, table, key):
         response = self.dynamodb_table.get_item(Key=key)
         pass
-
-    def write_to_ddb(self, table, item):
-        response = self.dynamodb_table.put_item(Item=item)
-        return response
