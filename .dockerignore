@@ -1,0 +1,5 @@
+env
+links
+*.json
+/mountain/spiders/sharma.py
+/mountain/spiders/ondra.py
