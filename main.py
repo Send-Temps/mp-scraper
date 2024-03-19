@@ -33,7 +33,7 @@ def main():
 
     process = CrawlerProcess(get_project_settings())
 
-    process.crawl('megos', start_urls=links, output_file='testing.json')
+    process.crawl('megos', start_urls=links, output_file='payload.json')
     process.start()
 
     with open('payload.json') as payload_file:
