@@ -30,10 +30,6 @@ The utility file contains some common functions for accessing our AWS cloud fram
 
 ## Back of Envelope:
 
-Found out googlebot does not respect crawl delay, gives credibility to me not
-respecting it lol. Will try to keep it reasonable - with 10s crawl delay,
-could crawl entire site in a month.
-
 	rts = 277,724 = routes on mountain project, plus ~30k for area pages,
 		so = ~300,000
 	crl_dly = 60 = crawl delay on mountain project (from robots.txt)
