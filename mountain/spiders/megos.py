@@ -18,7 +18,7 @@ class MegosSpider(scrapy.Spider):
     }
 
     # start_urls = [
-    #     'https://www.mountainproject.com/area/111721391/florida'
+    #     'https://www.mountainproject.com/route/106226264/cherry-twist'
     # ]
 
     def __init__(self, **kwargs):
@@ -60,7 +60,7 @@ class MegosSpider(scrapy.Spider):
 
         #for route pages, scrape relevant data
         elif content_type == 'route':
-            yield self.parse_route(response, response.meta.get('coord'), response.css('h1::text').get().strip())
+            yield self.parse_route(response, response.meta.get('coord'), response.css('.mp-sidebar h3::text').get()[10:])
 
         #in case other links are visited in error:
         else:
