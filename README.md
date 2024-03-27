@@ -2,16 +2,17 @@
 Mountain Project scraping tool
 
 This tool is a web scraper run in ECS containers dispatched by an AWS Batch job within the route-data-etl step function. Below you will find an explanation of every directory and file contained in this repository.
+
 ## Folders
 ### /links/
 The links folder contains `links-1` to `links-9`, text files containing all of the seed links for the scraper to access every route and sub area on Mountain Project's site. They are split into these files to create managable chunks for each parallel ECS container to handle independantly. Each instance of the scraper will read one of these files and use the seed links to scrape a chunk of the site.
 
 ### /mountain/
-The crawler code lives in this directory. The crawler was made using the python crawling framework [Scrapy](https://docs.scrapy.org/en/latest/). Along with some configuration items used by the scraper to handle and process data, the `/mouintain/spiders/` folder contains the "spiders", which are ["the classes which define how a certain site (or a group of sites) will be scraped, including how to perform the crawl (i.e. follow links) and how to extract structured data from their pages (i.e. scraping items)"](https://docs.scrapy.org/en/latest/topics/spiders.html). Basically, the logic for the entire scrape lives here. I have decided to name the spiders after famous rock climbers (just seemed right to me). 
+The crawler code lives in this directory. The crawler was made using the python crawling framework [Scrapy](https://docs.scrapy.org/en/latest/). Along with some configuration items used by the scraper to handle and process data, the `/mouintain/spiders/` folder contains the "spiders", which are ["the classes which define how a certain site (or a group of sites) will be scraped, including how to perform the crawl (i.e. follow links) and how to extract structured data from their pages (i.e. scraping items)"](https://docs.scrapy.org/en/latest/topics/spiders.html). Basically, the logic for the entire scrape lives here. I have decided to name the spiders after famous rock climbers (just seemed right to me).
 
 `Megos`, the main spider of the project, is responsible for the recursive scrape of an area and all its sub areas. `Megos` is capable of accepting links to both areas and routes. If it receives an area link, it decides whether the page is a parent node (the area contains sub areas and not individual routes, i.e. the page for an entire state), or a leaf node (the page contains individual routes), and processes accordingly. Once it gets a route page, it scrapes all relevant data and returns it as a JSON object.
 
-`Ondra` is more of a test spider that scrapes exactly one route (Arrowhead Arete in Morrison, CO, to be exact), and no area pages. This was used in testing to ensure accuracy of data scraped.
+`Ondra` is a testing utility spider which will scrape exactly one mountain project page and write the scraped html to a file named according to the content type and mountain project id.
 
 `Sharma` is a to-be-written spider that will scrape a user's to-do list and return each route as a JSON object, in the same format as the `Megos` crawler. This data will be used to populate a user's to-do list on the SendTemps app.
 
@@ -27,6 +28,51 @@ The utility file contains some common functions for accessing our AWS cloud fram
 - Access DynamoDB (used to write new route data as well as update existing routes that have changed)
 - Create a hash of route data (for checking if route data has changed in the cache/DDB)
 - Get/Create a route's Send Temps ID - a uuid used for identifying a route on the Send Temps platform
+
+## Running the Spiders
+First navigate to the root directory and run the following commands (this assumes that you have [pip](https://pypi.org/project/pip/) installed):
+```
+python3 -m venv env
+source env/bin/activate
+pip install requirements.txt
+```
+This will create a new virtual Python environment and install the required dependancies for the project (ie Scrapy).
+To run a single spider, the syntax is as follows:
+```
+scrapy crawl <spider name>
+```
+For example, if running `ondra` to download a single MP page, the syntax for providing the link as an arg is as follows:
+```
+scrapy crawl ondra -a link=<insert mountain project link here>
+```
+
+## Building the Project
+Navigate to the root directory for the repository in your terminal (ie the directory with the Dockerfile). To build the docker image for deployment on AWS (in the Send Temps cloud environment), run the following docker command:
+```
+docker build --platform linux/amd64 -t <tagname> .
+```
+This will ensure the image is build on the amd64 linux distribution, and will be compatible with the infrastructure choices we've made in our project. 
+To push the image to ECR, updating what is run by our etl pipeline, run the following commands:
+```
+docker tag <image id> <AWS Account ID>.dkr.ecr.<AWS Region>.amazonaws.com/<tagname>
+docker push <AWS Account ID>.dkr.ecr.<AWS Region>.amazonaws.com/<tagname>
+```
+
+If you are building for local deployment, simply run the following docker build:
+```
+docker build -t <python-imagename> .
+```
+To run the image locally, run the following: 
+
+**WARNING!** Running this command will kick off a scrape from your machine on the MP site. By default, the test links set will be used, meaning only Florida - a few hundred pages - will be scraped.
+```
+docker run <python-imagename>
+```
+Note: you may need to pass AWS credentials to the Docker container in order to give it access to the AWS account. To do so, run the following instead:
+```
+docker run -v ~/.aws:/root/.aws <python-imagename>
+```
+
 
 ## Back of Envelope:
 
