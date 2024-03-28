@@ -87,6 +87,12 @@ def main():
                     batch.put_item(Item=st_route)
                     # store updated hash in cache
                     cache[st_id] = util.hash_route_data(st_route)
+                    # write to new gps, as if route is overwritten, gridpoint
+                    # must be overwritten later in ETL pipeline
+                    gps_data.append({
+                        "routeId": st_id,
+                        "GPS": route["coord"]
+                    })
 
             # If the route does NOT exist in the cache:
             else:
